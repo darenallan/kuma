@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kuma-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: kuma
+      POSTGRES_PASSWORD: kuma
+      POSTGRES_DB: kuma
+    volumes:
+      - kuma_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kuma -d kuma"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: kuma-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://kuma:kuma@postgres:5432/kuma
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      ALGORITHM: HS256
+      YOUSIGN_API_URL: ${YOUSIGN_API_URL:-https://api-sandbox.yousign.app/v3}
+      YOUSIGN_API_KEY: ${YOUSIGN_API_KEY:-}
+      STORAGE_PATH: /app/storage/contracts
+      STORAGE_ENCRYPTION_KEY: ${STORAGE_ENCRYPTION_KEY:-}
+      CORS_ORIGINS: http://localhost:5173
+      ENVIRONMENT: development
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_FULL_NAME: ${ADMIN_FULL_NAME:-Administrateur}
+    volumes:
+      - ./backend:/app
+      - kuma_storage:/app/storage/contracts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "alembic upgrade head && python -m scripts.bootstrap_admin && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: kuma-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - kuma_frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  kuma_pgdata:
+  kuma_storage:
+  kuma_frontend_node_modules:

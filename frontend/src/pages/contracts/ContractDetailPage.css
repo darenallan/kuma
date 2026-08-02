@@ -1,0 +1,103 @@
+/* ═══ Timeline ═══ */
+.timeline-container {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: var(--space-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  min-width: 100px;
+}
+
+.timeline-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 55%;
+  right: -45%;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.timeline-step--done:not(:last-child)::after {
+  background: var(--accent);
+}
+
+.timeline-dot {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 1;
+  transition: all var(--duration-base) var(--ease);
+}
+
+.timeline-step--done .timeline-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.timeline-step--current .timeline-dot {
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+.timeline-label {
+  margin-top: var(--space-sm);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.timeline-step--done .timeline-label,
+.timeline-step--current .timeline-label {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ═══ Detail rows ═══ */
+.detail-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid hsl(225, 15%, 16%);
+  font-size: var(--fs-sm);
+  gap: var(--space-md);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row span:first-child {
+  color: var(--text-muted);
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+.detail-row span:last-child {
+  color: var(--text-primary);
+  text-align: right;
+}
