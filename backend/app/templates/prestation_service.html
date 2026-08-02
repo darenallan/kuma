@@ -38,7 +38,7 @@
 
   <h2>Conditions financieres</h2>
   <table class="summary">
-    <tr><td>Montant</td><td>{{ contract.amount }} EUR</td></tr>
+    <tr><td>Montant</td><td>{{ "{:,.0f}".format(contract.amount)|replace(",", " ") }} FCFA</td></tr>
     {% if contract.duration_months %}
     <tr><td>Duree</td><td>{{ contract.duration_months }} mois</td></tr>
     {% endif %}
