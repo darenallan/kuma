@@ -44,7 +44,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: sh -c "alembic upgrade head && python -m scripts.bootstrap_admin && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "alembic upgrade head && python -m scripts.bootstrap_admin && python -m scripts.bootstrap_template && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   frontend:
     build:
