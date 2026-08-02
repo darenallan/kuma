@@ -1,103 +1,114 @@
-/* ═══ Timeline ═══ */
-.timeline-container {
+/* ═══ Progression du contrat ═══ */
+.timeline {
   display: flex;
   align-items: center;
-  gap: 0;
-  padding: var(--space-lg);
+  gap: var(--space-xs);
+  list-style: none;
+  padding: var(--space-lg) var(--space-md);
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
   overflow-x: auto;
 }
 
 .timeline-step {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 0.6rem;
   flex: 1;
-  position: relative;
-  min-width: 100px;
-}
-
-.timeline-step:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  top: 14px;
-  left: 55%;
-  right: -45%;
-  height: 2px;
-  background: var(--border);
-  z-index: 0;
-}
-
-.timeline-step--done:not(:last-child)::after {
-  background: var(--accent);
-}
-
-.timeline-dot {
-  width: 30px; height: 30px;
-  border-radius: var(--radius-full);
-  background: var(--bg-secondary);
-  border: 2px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--fs-xs);
-  font-weight: 700;
+  min-width: 0;
   color: var(--text-muted);
-  position: relative;
-  z-index: 1;
-  transition: all var(--duration-base) var(--ease);
-}
-
-.timeline-step--done .timeline-dot {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-
-.timeline-step--current .timeline-dot {
-  box-shadow: 0 0 0 4px var(--accent-glow);
-}
-
-.timeline-label {
-  margin-top: var(--space-sm);
   font-size: var(--fs-xs);
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.timeline-step--done .timeline-label,
-.timeline-step--current .timeline-label {
-  color: var(--text-primary);
   font-weight: 600;
 }
-
-/* ═══ Detail rows ═══ */
-.detail-rows {
-  display: flex;
-  flex-direction: column;
+.timeline-step:not(:last-child)::after {
+  content: '';
+  flex: 1;
+  min-width: 20px;
+  height: 2px;
+  background: var(--border);
+  border-radius: var(--radius-full);
 }
+.timeline-step--done:not(:last-child)::after { background: var(--success); }
+
+.timeline-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all var(--duration-base) var(--ease);
+}
+.timeline-step--done .timeline-dot {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+.timeline-step--current .timeline-dot { box-shadow: 0 0 0 4px var(--success-soft); }
+.timeline-step--done { color: var(--text-primary); }
+
+.timeline-label { white-space: nowrap; }
+
+/* ═══ Bandeau d'information ═══ */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.notice--danger { background: var(--danger-soft); color: var(--danger); }
+
+/* ═══ Listes de détail ═══ */
+.detail-list { display: flex; flex-direction: column; }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid hsl(225, 15%, 16%);
-  font-size: var(--fs-sm);
+  align-items: baseline;
   gap: var(--space-md);
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-sm);
 }
+.detail-row:last-child { border-bottom: none; }
+.detail-row:first-child { padding-top: 0; }
 
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-.detail-row span:first-child {
+.detail-row dt {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   color: var(--text-muted);
-  text-transform: capitalize;
   flex-shrink: 0;
 }
-
-.detail-row span:last-child {
+.detail-row dt .icon { color: var(--text-muted); }
+.detail-row dd {
   color: var(--text-primary);
+  font-weight: 600;
   text-align: right;
+  word-break: break-word;
+}
+
+.detail-row--stacked { flex-direction: column; align-items: stretch; gap: 0.3rem; }
+.detail-row--stacked dd { text-align: left; font-weight: 500; line-height: 1.6; white-space: pre-wrap; }
+
+.detail-amount {
+  color: var(--accent) !important;
+  font-size: var(--fs-md);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .timeline-label { display: none; }
+  .timeline-step { flex: 1; }
+  .timeline { padding: var(--space-md); }
 }

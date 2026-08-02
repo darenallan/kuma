@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -14,27 +15,29 @@ import ContractDetailPage from './pages/contracts/ContractDetailPage';
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<DashboardPage />} />
-              <Route path="clients" element={<ClientsListPage />} />
-              <Route path="templates" element={<TemplatesListPage />} />
-              <Route path="contracts" element={<ContractsListPage />} />
-              <Route path="contracts/new" element={<ContractCreatePage />} />
-              <Route path="contracts/:id" element={<ContractDetailPage />} />
-            </Route>
-          </Routes>
-        </AuthProvider>
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<DashboardPage />} />
+                <Route path="clients" element={<ClientsListPage />} />
+                <Route path="templates" element={<TemplatesListPage />} />
+                <Route path="contracts" element={<ContractsListPage />} />
+                <Route path="contracts/new" element={<ContractCreatePage />} />
+                <Route path="contracts/:id" element={<ContractDetailPage />} />
+              </Route>
+            </Routes>
+          </AuthProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

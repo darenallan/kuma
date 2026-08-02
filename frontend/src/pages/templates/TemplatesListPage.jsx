@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../api/client';
 import Badge from '../../components/ui/Badge';
 import EmptyState from '../../components/ui/EmptyState';
+import Icon from '../../components/ui/Icon';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { formatDate } from '../../utils/formatters';
 
@@ -16,39 +18,63 @@ export default function TemplatesListPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <LoadingSpinner size="lg" text="Chargement des templates..." />;
+  if (loading) return <LoadingSpinner size="lg" text="Chargement des modèles…" />;
 
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Templates</h1>
-          <p className="page-subtitle">{templates.length} template{templates.length !== 1 ? 's' : ''} disponible{templates.length !== 1 ? 's' : ''}</p>
+          <h1 className="page-title">Modèles de contrat</h1>
+          <p className="page-subtitle">
+            {templates.length} modèle{templates.length !== 1 ? 's' : ''} disponible{templates.length !== 1 ? 's' : ''}
+          </p>
         </div>
       </div>
 
       {templates.length === 0 ? (
         <EmptyState
-          icon="📋"
-          title="Aucun template"
-          text="Les templates de contrat permettent de générer des documents PDF automatiquement."
+          icon="template"
+          title="Aucun modèle"
+          text="Les modèles définissent la trame de vos contrats et permettent de générer les PDF automatiquement."
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--space-md)' }}>
-          {templates.map((t) => (
-            <div key={t.id} className="card card--interactive">
-              <div className="flex items-center justify-between mb-md">
-                <h3 style={{ fontSize: 'var(--fs-md)', fontWeight: 700 }}>{t.name}</h3>
-                <Badge variant={t.is_active ? 'success' : 'neutral'}>{t.is_active ? 'Actif' : 'Inactif'}</Badge>
+        <div className="grid grid--cards">
+          {templates.map((t, i) => (
+            <article key={t.id} className="card animate-slide-up" style={{ animationDelay: `${i * 50}ms` }}>
+              <div className="flex items-center justify-between gap-sm mb-md">
+                <span className="stat-card-icon stat-card-icon--accent" style={{ marginBottom: 0 }}>
+                  <Icon name="template" size={18} />
+                </span>
+                <Badge variant={t.is_active ? 'success' : 'neutral'}>
+                  {t.is_active ? 'Actif' : 'Inactif'}
+                </Badge>
               </div>
-              <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
+
+              <h2 style={{ fontSize: 'var(--fs-base)', fontWeight: 700, marginBottom: '0.25rem' }}>{t.name}</h2>
+              <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-muted)', lineHeight: 1.55, minHeight: '2.7em' }}>
                 {t.description || 'Aucune description'}
               </p>
-              <div className="flex items-center justify-between" style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)' }}>
-                <span>v{t.version}</span>
+
+              <div
+                className="flex items-center justify-between mt-md"
+                style={{
+                  paddingTop: 'var(--space-md)',
+                  borderTop: '1px solid var(--border)',
+                  fontSize: 'var(--fs-xs)',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                <span>Version {t.version}</span>
                 <span>{formatDate(t.created_at)}</span>
               </div>
-            </div>
+
+              {t.is_active && (
+                <Link to="/contracts/new" className="btn btn--secondary btn--sm w-full mt-md">
+                  Créer un contrat
+                  <Icon name="arrowRight" size={14} />
+                </Link>
+              )}
+            </article>
           ))}
         </div>
       )}

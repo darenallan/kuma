@@ -1,23 +1,18 @@
-export default function StatsCard({ icon, value, label, color }) {
+import Icon from './Icon';
+import './StatsCard.css';
+
+/**
+ * `tone` mappe sur les tokens sémantiques plutôt que sur des couleurs brutes,
+ * pour que la carte suive automatiquement le thème clair/sombre.
+ */
+export default function StatsCard({ icon, value, label, tone = 'accent', delay = 0 }) {
   return (
-    <div className="card card--interactive animate-slide-up" style={{ '--delay': '0ms' }}>
-      <div className="flex items-center gap-md">
-        <div
-          style={{
-            width: 44, height: 44,
-            borderRadius: 'var(--radius-md)',
-            background: color ? `${color}22` : 'var(--accent-muted)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.25rem',
-          }}
-        >
-          {icon}
-        </div>
-        <div>
-          <div style={{ fontSize: 'var(--fs-xl)', fontWeight: 800, lineHeight: 1.1 }}>{value}</div>
-          <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
-        </div>
-      </div>
+    <div className="stat-card animate-slide-up" style={{ animationDelay: `${delay}ms` }}>
+      <span className={`stat-card-icon stat-card-icon--${tone}`}>
+        <Icon name={icon} size={20} />
+      </span>
+      <span className="stat-card-value">{value}</span>
+      <span className="stat-card-label">{label}</span>
     </div>
   );
 }

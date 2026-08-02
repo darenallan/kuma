@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useCallback } from 'react';
+import Icon from '../components/ui/Icon';
 
 const ToastContext = createContext(null);
+
+const TOAST_ICONS = { success: 'checkCircle', error: 'closeCircle', info: 'info' };
 
 let toastId = 0;
 
@@ -20,10 +23,15 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <div className="toast-container">
+      {/* aria-live : les lecteurs d'écran annoncent le retour sans voler le focus */}
+      <div className="toast-container" role="status" aria-live="polite" aria-atomic="false">
         {toasts.map((t) => (
-          <div key={t.id} className={`toast toast--${t.type}`} onClick={() => removeToast(t.id)}>
-            <span>{t.type === 'success' ? '✓' : t.type === 'error' ? '✕' : 'ℹ'}</span>
+          <div
+            key={t.id}
+            className={`toast toast--${t.type}`}
+            onClick={() => removeToast(t.id)}
+          >
+            <Icon name={TOAST_ICONS[t.type] || 'info'} size={18} />
             <span>{t.message}</span>
           </div>
         ))}
