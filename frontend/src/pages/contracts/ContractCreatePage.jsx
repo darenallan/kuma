@@ -24,7 +24,7 @@ export default function ContractCreatePage() {
     client_id: null,
     amount: '',
     duration_months: '',
-    variables: { prestataire_nom: '', prestation: '', clauses_specifiques: '' },
+    variables: {},
   });
 
   useEffect(() => {
@@ -37,13 +37,23 @@ export default function ContractCreatePage() {
   const selectedTemplate = templates.find((t) => t.id === form.template_id);
   const selectedClient = clients.find((c) => c.id === form.client_id);
 
+  // Les champs à saisir viennent du modèle choisi : un modèle personnalisé
+  // déclare ses propres variables, il ne peut pas y avoir de liste figée ici.
+  const templateVariables = selectedTemplate?.variables_schema || [];
+
   const setVariable = (key, value) =>
     setForm((f) => ({ ...f, variables: { ...f.variables, [key]: value } }));
 
   const canNext = () => {
     if (step === 0) return !!form.template_id;
     if (step === 1) return !!form.client_id;
-    if (step === 2) return !!form.amount && Number(form.amount) > 0;
+    if (step === 2) {
+      const amountOk = !!form.amount && Number(form.amount) > 0;
+      const requiredOk = templateVariables
+        .filter((v) => v.required)
+        .every((v) => String(form.variables[v.key] || '').trim());
+      return amountOk && requiredOk;
+    }
     return true;
   };
 
@@ -112,7 +122,15 @@ export default function ContractCreatePage() {
                     key={t.id}
                     type="button"
                     className={`wizard-option ${form.template_id === t.id ? 'wizard-option--selected' : ''}`}
-                    onClick={() => setForm((f) => ({ ...f, template_id: t.id }))}
+                    onClick={() =>
+                      // Changer de modèle change les champs à saisir : on repart d'un état vierge
+                      // plutôt que de conserver des valeurs qui n'ont plus de destination.
+                      setForm((f) => ({
+                        ...f,
+                        template_id: t.id,
+                        variables: f.template_id === t.id ? f.variables : {},
+                      }))
+                    }
                     aria-pressed={form.template_id === t.id}
                   >
                     <span className="wizard-option-icon"><Icon name="template" size={18} /></span>
@@ -165,30 +183,6 @@ export default function ContractCreatePage() {
           <section className="wizard-form">
             <h2 className="wizard-step-title">Détails de la prestation</h2>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="prestataire">Nom du prestataire</label>
-              <input
-                id="prestataire"
-                className="input"
-                value={form.variables.prestataire_nom}
-                onChange={(e) => setVariable('prestataire_nom', e.target.value)}
-                placeholder="Votre nom ou raison sociale"
-              />
-              <span className="form-hint">Apparaîtra en tête du contrat.</span>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="prestation">Objet de la prestation</label>
-              <textarea
-                id="prestation"
-                className="textarea"
-                value={form.variables.prestation}
-                onChange={(e) => setVariable('prestation', e.target.value)}
-                placeholder="Montage vidéo, étalonnage, sous-titrage FR/EN…"
-                rows={3}
-              />
-            </div>
-
             <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
               <div className="form-group">
                 <label className="form-label" htmlFor="amount">
@@ -221,18 +215,48 @@ export default function ContractCreatePage() {
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="clauses">Clauses spécifiques</label>
-              <textarea
-                id="clauses"
-                className="textarea"
-                value={form.variables.clauses_specifiques}
-                onChange={(e) => setVariable('clauses_specifiques', e.target.value)}
-                placeholder="Conditions particulières, modalités de paiement…"
-                rows={3}
-              />
-              <span className="form-hint">Optionnel — laissé vide, ce bloc n'apparaît pas dans le contrat.</span>
-            </div>
+            {/* Champs déclarés par le modèle sélectionné */}
+            {templateVariables.map((variable) => {
+              const fieldId = `var_${variable.key}`;
+              const value = form.variables[variable.key] ?? '';
+
+              return (
+                <div className="form-group" key={variable.key}>
+                  <label className="form-label" htmlFor={fieldId}>
+                    {variable.label}
+                    {variable.required && <span className="form-required">*</span>}
+                  </label>
+
+                  {variable.type === 'textarea' ? (
+                    <textarea
+                      id={fieldId}
+                      className="textarea"
+                      rows={3}
+                      value={value}
+                      onChange={(e) => setVariable(variable.key, e.target.value)}
+                      required={variable.required}
+                    />
+                  ) : (
+                    <input
+                      id={fieldId}
+                      className="input"
+                      type={variable.type === 'number' ? 'number' : variable.type === 'date' ? 'date' : 'text'}
+                      value={value}
+                      onChange={(e) => setVariable(variable.key, e.target.value)}
+                      required={variable.required}
+                    />
+                  )}
+
+                  {variable.help && <span className="form-hint">{variable.help}</span>}
+                </div>
+              );
+            })}
+
+            {templateVariables.length === 0 && (
+              <p className="form-hint">
+                Ce modèle ne demande aucune information supplémentaire.
+              </p>
+            )}
           </section>
         )}
 
@@ -244,8 +268,6 @@ export default function ContractCreatePage() {
                 <div className="recap-row"><dt>Modèle</dt><dd>{selectedTemplate?.name}</dd></div>
                 <div className="recap-row"><dt>Client</dt><dd>{selectedClient?.company_name}</dd></div>
                 <div className="recap-row"><dt>Contact</dt><dd>{selectedClient?.contact_name} · {selectedClient?.email}</dd></div>
-                <div className="recap-row"><dt>Prestataire</dt><dd>{form.variables.prestataire_nom || '—'}</dd></div>
-                <div className="recap-row"><dt>Prestation</dt><dd>{form.variables.prestation || '—'}</dd></div>
                 <div className="recap-row recap-row--highlight">
                   <dt>Montant</dt>
                   <dd>{form.amount ? formatCurrency(form.amount) : '—'}</dd>
@@ -253,9 +275,12 @@ export default function ContractCreatePage() {
                 {form.duration_months && (
                   <div className="recap-row"><dt>Durée</dt><dd>{form.duration_months} mois</dd></div>
                 )}
-                {form.variables.clauses_specifiques && (
-                  <div className="recap-row"><dt>Clauses</dt><dd>{form.variables.clauses_specifiques}</dd></div>
-                )}
+                {templateVariables.map((variable) => (
+                  <div className="recap-row" key={variable.key}>
+                    <dt>{variable.label}</dt>
+                    <dd>{form.variables[variable.key] || '—'}</dd>
+                  </div>
+                ))}
               </dl>
             </div>
             <p className="form-hint mt-md">

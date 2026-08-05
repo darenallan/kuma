@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>{{ title }} — {{ reference }}</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  body { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.55; }
+  h1 { font-size: 16pt; text-align: center; margin-bottom: 4px; }
+  .reference { text-align: center; color: #555; font-size: 9pt; margin-bottom: 22px; }
+  h2 { font-size: 11.5pt; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-top: 20px; margin-bottom: 8px; }
+  p { margin-bottom: 7px; text-align: justify; }
+  .parties { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 8px; }
+  .party { width: 48%; }
+  .party p { text-align: left; margin-bottom: 2px; }
+  table.summary { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  table.summary td { padding: 6px 4px; border-bottom: 1px solid #eee; }
+  table.summary td:last-child { text-align: right; font-weight: bold; }
+  .signatures { margin-top: 42px; display: flex; justify-content: space-between; gap: 32px; }
+  .signature-block { width: 45%; border-top: 1px solid #333; padding-top: 4px; text-align: center; font-size: 9.5pt; }
+</style>
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  <p class="reference">Référence : {{ reference }} — {{ date }}</p>
+
+  <div class="parties">
+    <div class="party">
+      <h2>Le Prestataire</h2>
+      <p>{{ prestataire_nom }}</p>
+    </div>
+    <div class="party">
+      <h2>Le Client</h2>
+      <p>{{ client.company_name }}</p>
+      <p>{{ client.contact_name }}</p>
+      {% if client.address %}<p>{{ client.address }}</p>{% endif %}
+      <p>{{ client.email }}</p>
+    </div>
+  </div>
+
+  {% if intro_paragraphs %}
+    {% for para in intro_paragraphs %}<p>{{ para }}</p>{% endfor %}
+  {% endif %}
+
+  <h2>Conditions financières</h2>
+  <table class="summary">
+    <tr><td>Montant total</td><td>{{ montant }}</td></tr>
+    {% if duree %}<tr><td>Durée</td><td>{{ duree }}</td></tr>{% endif %}
+  </table>
+
+  {# Les paragraphes sont pré-découpés côté Python : l'échappement Jinja
+     s'applique donc à chaque fragment de texte saisi par l'utilisateur. #}
+  {% for article in articles %}
+    <h2>Article {{ loop.index }} — {{ article.title }}</h2>
+    {% for para in article.paragraphs %}<p>{{ para }}</p>{% endfor %}
+  {% endfor %}
+
+  <div class="signatures">
+    <div class="signature-block">Le Prestataire</div>
+    <div class="signature-block">Le Client</div>
+  </div>
+</body>
+</html>

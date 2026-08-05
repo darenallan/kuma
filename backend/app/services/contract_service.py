@@ -8,7 +8,13 @@ from app.models.client import Client
 from app.models.contract import Contract, ContractStatus
 from app.models.template import ContractTemplate
 from app.schemas.contract import ContractCreate
-from app.services import audit_service, pdf_service, storage_service, yousign_service
+from app.services import (
+    audit_service,
+    pdf_service,
+    storage_service,
+    template_service,
+    yousign_service,
+)
 
 
 def _generate_reference() -> str:
@@ -55,12 +61,19 @@ def generate_pdf(db: Session, contract: Contract, actor_id: int) -> Contract:
     if template is None or client is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Donnees liees au contrat introuvables")
 
-    context = {
-        "contract": contract,
-        "client": client,
-        **contract.variables,
-    }
-    pdf_bytes = pdf_service.render_contract_pdf(template.filename, context)
+    if template.body:
+        # Modèle composé dans l'interface : articles structurés, substitution sûre.
+        pdf_bytes = pdf_service.render_custom_contract_pdf(
+            template.body,
+            template_service.build_context(contract, client, template),
+            template_service.build_values(contract, client),
+        )
+    else:
+        # Modèle livré avec l'application (fichier Jinja2 du dépôt).
+        pdf_bytes = pdf_service.render_contract_pdf(
+            template.filename,
+            {"contract": contract, "client": client, **(contract.variables or {})},
+        )
     contract.pdf_storage_key = storage_service.save_encrypted_pdf(contract.reference, pdf_bytes)
     contract.status = ContractStatus.GENERATED
     db.commit()

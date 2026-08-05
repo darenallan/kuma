@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ClientsListPage from './pages/clients/ClientsListPage';
 import TemplatesListPage from './pages/templates/TemplatesListPage';
+import TemplateEditorPage from './pages/templates/TemplateEditorPage';
 import ContractsListPage from './pages/contracts/ContractsListPage';
 import ContractCreatePage from './pages/contracts/ContractCreatePage';
 import ContractDetailPage from './pages/contracts/ContractDetailPage';
@@ -30,6 +31,8 @@ export default function App() {
                 <Route index element={<DashboardPage />} />
                 <Route path="clients" element={<ClientsListPage />} />
                 <Route path="templates" element={<TemplatesListPage />} />
+                <Route path="templates/new" element={<TemplateEditorPage />} />
+                <Route path="templates/:id/edit" element={<TemplateEditorPage />} />
                 <Route path="contracts" element={<ContractsListPage />} />
                 <Route path="contracts/new" element={<ContractCreatePage />} />
                 <Route path="contracts/:id" element={<ContractDetailPage />} />

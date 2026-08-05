@@ -12,9 +12,14 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db
+from app.core.rate_limit import limiter
 from app.core.security import hash_password
 from app.main import app
 from app.models.user import User, UserRole
+
+# La suite se connecte plusieurs fois par minute via la fixture d'authentification :
+# laisser le rate limiting actif rendrait les tests dépendants de leur ordre.
+limiter.enabled = False
 
 engine = create_engine(
     "sqlite:///:memory:",
